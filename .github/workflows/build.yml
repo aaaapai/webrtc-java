@@ -1,14 +1,6 @@
 name: Build
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "**.cpp"
-      - "**.h"
-      - "**.java"
-
   pull_request:
     branches:
       - main
