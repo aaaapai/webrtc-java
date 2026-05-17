@@ -169,7 +169,7 @@ if(NOT EXISTS "${WEBRTC_SRC_DIR}/depot_tools")
     message(STATUS "WebRTC: fetch depot tools")
     file(MAKE_DIRECTORY ${WEBRTC_SRC_DIR})
     execute_command(
-        COMMAND git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+        COMMAND git clone --depth=1 https://chromium.googlesource.com/chromium/tools/depot_tools.git
         WORKING_DIRECTORY "${WEBRTC_SRC_DIR}"
     )
 endif()
