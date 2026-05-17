@@ -77,7 +77,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 target_link_libraries(${PROJECT_NAME} jni-voithos)
-target_link_libraries(${PROJECT_NAME} webrtc)
+# target_link_libraries(${PROJECT_NAME} webrtc)
 
 if(APPLE)
     set_source_files_properties(${SOURCES} PROPERTIES COMPILE_FLAGS "-x objective-c++")
