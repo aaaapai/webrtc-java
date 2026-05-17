@@ -1,0 +1,38 @@
+name: Build
+
+on:
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    
+    steps:
+    - uses: actions/checkout@main
+      with:
+         submodules: true
+    
+    # 添加ccache步骤
+    - name: CCache
+      uses: hendrikmuhs/ccache-action@main
+      with:
+        key: ${{ runner.os }}-ndk-${{ env.BUILD_TYPE }}
+        max-size: 3G
+
+    - name: Configure CMake and Build
+      run: bash android_ci_build.bash
+      env:
+        CC: ccache clang
+        CXX: ccache clang++
+        CMAKE_C_COMPILER_LAUNCHER: ccache
+        CMAKE_CXX_COMPILER_LAUNCHER: ccache
+    
+    - name: Upload build output
+      uses: actions/upload-artifact@main
+      with:
+        name: artifacts
+        path: |
+              **/lib*.so
