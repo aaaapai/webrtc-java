@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
 
-if(NOT WEBRTC_TOOLCHAIN_FILE STREQUAL "")
-    message(STATUS "Toolchain file: ${WEBRTC_TOOLCHAIN_FILE}")
-    set(CMAKE_TOOLCHAIN_FILE "${WEBRTC_TOOLCHAIN_FILE}")
-endif()
-
 project(webrtc-java)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,34 +11,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -pipe -integrated-as -mllvm -polly -mllv
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -pipe -integrated-as -mllvm -polly -mllvm -polly-vectorizer=stripmine -mllvm -polly-invariant-load-hoisting -mllvm -polly-run-inliner -mllvm -polly-run-dce -mllvm -polly-invariant-load-hoisting -flto -mllvm -polly-run-inliner -mllvm -polly-run-dce -fdata-sections -ffunction-sections -mllvm -polly-detect-keep-going -mllvm -polly-ast-use-context -march=armv8-a+simd -fvisibility=hidden -Wall -Wextra -ferror-limit=0 -Wno-return-type -Wno-unused-parameter -Wno-c++98-compat -Wno-c++98-compat-pedantic -DGLM_FORCE_INTRINSICS -Wno-unicode-whitespace -Wno-format -Wno-unused-function -Wno-vla-cxx-extension -frtti -fmerge-all-constants -D_FILE_OFFSET_BITS=64 -D__USE_BSD -D_ALLBSD_SOURCE -mllvm -inlinehint-threshold=100000 -D_GNU_SOURCE -U__USE_GNU")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld -flto -O3 -Wl,--strip-all -fvisibility=hidden -Wl,-O3 -Wl,--gc-sections -Wl,--as-needed -static-libstdc++ -Wl,--exclude-libs,ALL -Wl,--lto-O3")
 
-if(UNIX AND NOT APPLE)
-    # Apply the sysroot configuration for the actual build
-    if(DEFERRED_SYSROOT)
-        # Configure sysroot for all subsequent operations
-        set(CMAKE_SYSROOT ${DEFERRED_SYSROOT})
-        set(CMAKE_FIND_ROOT_PATH ${DEFERRED_SYSROOT})
-
-        # Set pkg-config environment
-        set(ENV{PKG_CONFIG_SYSROOT_DIR} "${DEFERRED_SYSROOT}")
-        set(ENV{PKG_CONFIG_PATH} "${DEFERRED_SYSROOT}/usr/lib/pkgconfig:${DEFERRED_SYSROOT}/usr/share/pkgconfig")
-
-        # Restrict library and header searches to sysroot only
-        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-        set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-        set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-    endif()
-
-    set(LINUX TRUE)
-endif()
-
 if(APPLE)
     set(CMAKE_CXX_VISIBILITY_PRESET hidden)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s")
     set(SOURCE_TARGET macos)
-elseif(LINUX)
-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s")
-    set(SOURCE_TARGET linux)
 elseif(WIN32)
     set(CMAKE_CXX_FLAGS_RELEASE "/MT")
     set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
