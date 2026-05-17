@@ -61,7 +61,7 @@ target_sources(${PROJECT_NAME}
 if(APPLE)
     set(JNI_PLATFORM "darwin")
     set_source_files_properties(src/*.cpp PROPERTIES COMPILE_FLAGS "-x objective-c++")
-elseif(LINUX)
+elseif(ANDROID)
     set(JNI_PLATFORM "linux")
 elseif(WIN32)
     set(JNI_PLATFORM "windows")
