@@ -15,22 +15,6 @@ add_library(${PROJECT_NAME} STATIC pseudo.cxx pseudo.hxx)
 
 set(CUSTOM_LIBCXX false)
 
-if(LINUX AND NOT TARGET_CPU MATCHES "^arm")
-    set(CUSTOM_LIBCXX true)
-endif()
-
-if(NOT DEFINED TARGET_CPU)
-    if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-        set(TARGET_CPU "x86")
-    elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(TARGET_CPU "x64")
-    endif()
-
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm.*$")
-        set(TARGET_CPU "${CMAKE_SYSTEM_PROCESSOR}")
-    endif()
-endif()
-
 if(NOT DEFINED WEBRTC_BRANCH)
     set(WEBRTC_BRANCH "master")
 endif()
@@ -166,14 +150,6 @@ if(APPLE)
     )
     target_compile_definitions(${PROJECT_NAME} PUBLIC WEBRTC_MAC WEBRTC_POSIX WEBRTC_USE_H264)
     target_link_libraries(${PROJECT_NAME} "-framework Foundation" "-framework AVFoundation" "-framework CoreGraphics" "-framework CoreAudio" "-framework CoreVideo" "-framework ScreenCaptureKit" "-framework AudioToolbox" "-framework IOSurface" "-framework ApplicationServices" "-framework AppKit")
-elseif(LINUX)
-    # Find DBus
-    find_package(PkgConfig QUIET REQUIRED) # Include functions provided by PkgConfig module.
-    pkg_check_modules(DBUS REQUIRED dbus-1)
-
-    target_include_directories(${PROJECT_NAME} PUBLIC ${DBUS_INCLUDE_DIRS})
-    target_compile_definitions(${PROJECT_NAME} PUBLIC WEBRTC_LINUX WEBRTC_POSIX WEBRTC_USE_H264)
-    target_link_libraries(${PROJECT_NAME} X11 Xfixes Xrandr Xcomposite dbus-1)
 elseif(WIN32)
     target_compile_definitions(${PROJECT_NAME} PUBLIC WEBRTC_WIN WEBRTC_USE_H264 NOMINMAX WIN32_LEAN_AND_MEAN NDEBUG)
     target_link_libraries(${PROJECT_NAME} D3D11 DXGI user32 gdi32 iphlpapi dmoguids msdmo secur32 strmiids winmm wmcodecdspuuid ws2_32)
@@ -252,7 +228,7 @@ if (PATCHES)
 endif()
 
 message(STATUS "WebRTC: generate")
-set(COMPILE_ARGS "target_cpu=\"${TARGET_CPU}\" \
+set(COMPILE_ARGS "target_cpu=\"arm64\" \
 use_custom_libcxx=${CUSTOM_LIBCXX} \
 is_clang=true \
 is_debug=false \
@@ -271,12 +247,6 @@ symbol_level=0")
 
 if(APPLE)
     set(COMPILE_ARGS "${COMPILE_ARGS} mac_deployment_target=\"${CMAKE_OSX_DEPLOYMENT_TARGET}\"")
-elseif(LINUX)
-    if(${TARGET_CPU} STREQUAL "arm")
-        set(COMPILE_ARGS "${COMPILE_ARGS} custom_toolchain=\"//build/toolchain/linux:clang_arm\"")
-    elseif(${TARGET_CPU} STREQUAL "arm64")
-        set(COMPILE_ARGS "${COMPILE_ARGS} custom_toolchain=\"//build/toolchain/linux:clang_arm64\"")
-    endif()
 endif()
 
 execute_command(
@@ -301,46 +271,6 @@ else()
         COMMAND ninja -C "${WEBRTC_BUILD}"
         WORKING_DIRECTORY "${WEBRTC_SRC}"
     )
-endif()
-
-if(LINUX)
-    if(LINUX AND NOT TARGET_CPU MATCHES "^arm")
-        # Collect lib++ objects
-        file(GLOB_RECURSE LibCPP_OBJS
-            ${WEBRTC_SRC}/${WEBRTC_BUILD}/obj/buildtools/third_party/libc++/libc++/*.o
-        )
-        # Collect lib++abi objects
-        file(GLOB_RECURSE LibCPP_ABI_OBJS
-            ${WEBRTC_SRC}/${WEBRTC_BUILD}/obj/buildtools/third_party/libc++abi/libc++abi/*.o
-        )
-        # Create static libraries
-        execute_command(
-            COMMAND ${CMAKE_AR} rcs ${WEBRTC_SRC}/${WEBRTC_BUILD}/obj/libc++.a ${LibCPP_OBJS}
-        )
-        execute_command(
-            COMMAND ${CMAKE_AR} rcs ${WEBRTC_SRC}/${WEBRTC_BUILD}/obj/libc++abi.a ${LibCPP_ABI_OBJS}
-        )
-        # Install libc++ and libc++abi headers and libraries
-        install(
-            FILES
-                "${WEBRTC_SRC}/${WEBRTC_BUILD}/obj/libc++.a"
-                "${WEBRTC_SRC}/${WEBRTC_BUILD}/obj/libc++abi.a"
-            DESTINATION
-                "${WEBRTC_INSTALL_DIR}/lib"
-        )
-        install(
-            DIRECTORY "${WEBRTC_SRC}/third_party/libc++/src/include"
-            DESTINATION "${WEBRTC_INSTALL_DIR}/include/third_party/libc++"
-        )
-        install(
-            DIRECTORY "${WEBRTC_SRC}/buildtools/third_party/libc++/"
-            DESTINATION "${WEBRTC_INSTALL_DIR}/include/third_party/libc++"
-        )
-        install(
-            DIRECTORY "${WEBRTC_SRC}/third_party/libc++abi/src/include"
-            DESTINATION "${WEBRTC_INSTALL_DIR}/include/third_party/libc++abi"
-        )
-    endif()
 endif()
 
 install(FILES "${WEBRTC_LIB_PATH}" DESTINATION "${WEBRTC_INSTALL_DIR}/lib")
