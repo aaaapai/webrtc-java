@@ -1,6 +1,7 @@
-name: Build
+name: Android-jni-Build
 
 on:
+  push:
   workflow_dispatch:
 
 env:
