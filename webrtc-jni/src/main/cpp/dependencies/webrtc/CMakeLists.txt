@@ -142,11 +142,11 @@ target_include_directories(${PROJECT_NAME}
 )
 target_link_libraries(${PROJECT_NAME} ${TARGET_LINK_LIB})
 
-if(APPLE)
+if(ANDROID)
     target_include_directories(${PROJECT_NAME}
         PUBLIC
-            ${TARGET_INC_DIR}/sdk/objc
-            ${TARGET_INC_DIR}/sdk/objc/base
+            ${TARGET_INC_DIR}/sdk/android/native_api
+            ${TARGET_INC_DIR}/sdk/android/native_api/base
     )
     target_compile_definitions(${PROJECT_NAME} PUBLIC WEBRTC_MAC WEBRTC_POSIX WEBRTC_USE_H264)
     target_link_libraries(${PROJECT_NAME} "-framework Foundation" "-framework AVFoundation" "-framework CoreGraphics" "-framework CoreAudio" "-framework CoreVideo" "-framework ScreenCaptureKit" "-framework AudioToolbox" "-framework IOSurface" "-framework ApplicationServices" "-framework AppKit")
