@@ -25,7 +25,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL Clang AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /showFilenames")
 endif()
 
-add_subdirectory(dependencies/webrtc)
+# add_subdirectory(dependencies/webrtc)
 add_subdirectory(dependencies/jni-voithos)
 
 file(GLOB SOURCES_ROOT "src/*.cpp")
